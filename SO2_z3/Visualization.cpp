@@ -7,7 +7,8 @@
 #include <chrono>
 #include <thread>
 #include <string>
-
+#include <vector>
+#include <valarray>
 Visualization::Visualization() 
 {
     initscr();
@@ -57,7 +58,7 @@ void Visualization::Legend(){
     attron(COLOR_PAIR(6));
     mvprintw(8,85,"Queue:");
     
-    //printf carwash
+    //printf payment place
     attron(COLOR_PAIR(4));
     mvprintw(12,85,"PAYMENT PLACE:");
     DrawFrame(13,85,5,12,NULL);
@@ -146,7 +147,7 @@ void Visualization :: ClearFrame(int xcord, int ycord, int x, int y, int id){
 void Visualization :: SetQueue(int xcord, int ycord,int id){
         DrawFrame(xcord,ycord,5,6,id);
 }
-void Visualization :: Start(Client clients[],Distributor distributors[], SalesMan salesmans[]){//function start visualization
+void Visualization :: Start(Client clients[],Distributor distributors[], SalesMan salesmans[], vector<int> & gasolineQueue){//function start visualization
     int inputChar;
     int xcar[8]={3,3,13,13,3,3,13,13};
     int ycar[8]={35,45,35,45,55,65,55,65};
@@ -166,23 +167,57 @@ void Visualization :: Start(Client clients[],Distributor distributors[], SalesMa
         if(inputChar!=113){//while user dont press q button
         }
         else
-            return;        
-        
+            return;    
+        //######################################GASOLINE MAINTANCE########################################################################
+        int ycord=21;        
+            for(int i=0;i<gasolineQueue.capacity()+1;i++){//clear gasoline queue           
+                ClearFrame(20,ycord,5,6,clients[gasolineQueue[i]].id);
+                ycord+=8;
+            }
             for(int i=0;i<8;i++){
                 SetDistributorStatus(distributors[i].xcord,distributors[i].ycord,distributors[i].isUsed,distributors[i].id);
                 if(distributors[i].isUsed)
                     DrawFrame(xcar[i],ycar[i],5,6,distributors[i].clientID);
                 else           
                     ClearFrame(xcar[i],ycar[i],5,6,distributors[i].clientID);
+            }      
+        ycord=21;
+            for(int i=0;i<gasolineQueue.size();i++){      //actualise gasoline queue     
+                ClearFrame(20,ycord,5,6,clients[gasolineQueue[i]].id);
+                DrawFrame(20,ycord,5,6,clients[gasolineQueue[i]].id);
+                ycord+=8;
+                ClearFrame(20,ycord,5,6,clients[gasolineQueue[i]].id);
+            } 
+        //######################################PAYMENT MAINTANCE########################################################################
+         ycord=86;
+         for(int i=0;i<11;i++){
+                mvprintw(16,ycord," ");
+                ycord+=1;
+        }
+        ycord=86;
+         for(int i=0;i<4;i++){//actualise salesmans status
+            SetDistributorStatus(salesmans[i].xcord,salesmans[i].ycord,true,salesmans[i].id);
+            attron(COLOR_PAIR(1));
+            auto s = std::to_string(salesmans[i].clientID);
+            char const *pchar = s.c_str();
+            mvprintw(16,ycord,pchar);
+            ycord+=3;
+        }
+        ycord=91;
+        for(int i=0;i<32;i++){//clear payment place queue
+                mvprintw(18,ycord," ");
+                ycord+=1;
+        }
+        ycord=91;
+        for(int i=0;i<15;i++){//print payment place queue
+            if(clients[i].waitToPay){   
+                auto s = std::to_string(clients[i].id);
+                char const *pchar = s.c_str();
+                printw("|");
+                mvprintw(18,ycord,pchar);
+                printw("|");
+                ycord+=3;
             }
-        for(int i=0;i<22;i++){          
-                int ycord=21;
-                if(clients[i].waitToTank){        
-                    DrawFrame(20,ycord,5,6,clients[i].id);
-                    ycord+=8;
-                }
-                else           
-                    ClearFrame(20,ycord,5,6,clients[i].id);
         }
     }
 }

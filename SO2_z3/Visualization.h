@@ -4,11 +4,11 @@
 #include "Client.h"
 #include "Distributor.h"
 #include "SalesMan.h"
-
+#include <vector>
 class Visualization {    
 public:
     Visualization();
-    void Start(Client clients[],Distributor distributors[],SalesMan salesmans[]);
+    void Start(Client clients[],Distributor distributors[],SalesMan salesmans[], vector<int> & gasolineQueue);
     virtual ~Visualization();
 private:
     void CreateColors();
