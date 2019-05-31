@@ -136,9 +136,9 @@ void Visualization :: DrawFrame(int xcord, int ycord, int x, int y, int id, bool
                 printw(" ");                
                 move(xcord+i,ycord+j);
                 attron(COLOR_PAIR(6));
-                auto s = std::to_string(id);
-                char const *pchar = s.c_str();
-                printw(pchar);
+                //auto s = std::to_string(id);
+                //char const *pchar = s.c_str();
+                printw("%d",id);
                 printed=true;
             }
         }                
@@ -215,9 +215,7 @@ void Visualization :: Start(Client clients[],Distributor distributors[], SalesMa
             SetDistributorStatus(salesmans[i].xcord,salesmans[i].ycord,salesmans[i].isWorking,salesmans[i].id);
             if(salesmans[i].isWorking){
                 attron(COLOR_PAIR(1));
-                auto s = std::to_string(salesmans[i].clientID);
-                char const *pchar = s.c_str();
-                mvprintw(16,ycord,pchar);
+                mvprintw(16,ycord,"%d",salesmans[i].clientID);
             }
             ycord+=3;
         }
@@ -230,10 +228,10 @@ void Visualization :: Start(Client clients[],Distributor distributors[], SalesMa
         for(int i=0;i<paymentQueue.size();i++){//print payment place queue
             if(clients[paymentQueue[i]].waitToPay){   
                 attron(COLOR_PAIR(1));
-                auto s = std::to_string(clients[paymentQueue[i]].id);
-                char const *pchar = s.c_str();
+                //auto s = std::to_string(clients[paymentQueue[i]].id);
+                //char const *pchar = s.c_str();
                 printw("|");
-                mvprintw(18,ycord,pchar);
+                mvprintw(18,ycord,"%d",clients[paymentQueue[i]].id);
                 printw("|");
                 ycord+=3;
             }
@@ -252,10 +250,10 @@ void Visualization :: Start(Client clients[],Distributor distributors[], SalesMa
         for(int i=0;i<washQueue.size();i++){//print wash queue
             if(clients[washQueue[i]].waitToWash){   
                 attron(COLOR_PAIR(1));
-                auto s = std::to_string(clients[washQueue[i]].id);
-                char const *pchar = s.c_str();
+                //auto s = std::to_string(clients[washQueue[i]].id);
+                //char const *pchar = s.c_str();
                 printw("|");
-                mvprintw(8,ycord,pchar);
+                mvprintw(8,ycord,"%d",clients[washQueue[i]].id);
                 printw("|");
                 ycord+=3;
             }

@@ -71,33 +71,48 @@ void Run(Client *client){
     while(running){
         for(int i=0;i<numOfDistributors;i++){
             mx2.lock();
-            if(client->waitToTank && !client->waitToPay && !distributors[i].isUsed && (gasolineQueue[0]==client->id || gasolineQueue.empty())){
+            if(client->waitToTank && !client->waitToWash && !client->waitToPay && !distributors[i].isUsed && (gasolineQueue[0]==client->id || gasolineQueue.empty())){
                 erase(gasolineQueue,client->id);
                     client->SetDistributorID(i);
                     distributors[client->distributorID].SetBussy(client->id);
-                mx2.unlock();
+            mx2.unlock();
                     client->SetWaitToTank(false);
                     client->Refuel(client);//go refuel
                     mx2.lock();
                     paymentQueue.push_back(client->id);//queue to pay for gasoline
-                    mx2.unlock();
                     client->SetWaitToPay(true);
+                    mx2.unlock();
+            }        
+            mx2.unlock();
+        //car wash maintance
+            mx2.lock();
+            if(!carwash.isUsed && !client->waitToTank && client->waitToWash && !client->waitToPay && (washQueue[0]==client->id || washQueue.empty())){
+                erase(washQueue,client->id);
+                carwash.isUsed=true;
+                carwash.clientID=client->id;
+            mx2.unlock();
+                client->waitToWash=false;
+                client->Wash(client);
+                mx2.lock();
+                paymentQueue.push_back(client->id);//queue to pay for gasoline
+                client->SetWaitToPay(true);
+                mx2.unlock();
             }
             mx2.unlock();
         
         for(int j=0;j<numOfSalesMans;j++){
             mx2.lock();
-                if((!client->waitToTank || !client->waitToWash)&& client->waitToPay && !salesmans[j].isWorking && (paymentQueue[0]==client->id || paymentQueue.empty())){
+                if((!client->waitToTank && !client->waitToWash) && client->waitToPay && !salesmans[j].isWorking && (paymentQueue[0]==client->id || paymentQueue.empty())){
                     salesmans[j].SetBussy(client->id);
                     client->SetSalesmanID(j);
                     erase(paymentQueue,client->id);
-                    station.servicedCustomers+=1;
-                    station.income+=client->amountToPay;
                     mx2.unlock();
                     client->SetWaitToPay(false);
                     client->Pay(client);//go pay
 
                     mx2.lock();
+                    station.servicedCustomers+=1;
+                    station.income+=client->amountToPay;
                     salesmans[client->salesmanID].SetFree();
                     if(!client->waitToTank && !client->waitToWash)
                         distributors[client->distributorID].SetFree(); 
@@ -106,46 +121,26 @@ void Run(Client *client){
                     mx2.unlock();
                     client->Ride(client);//go for a ride
                 
-                if(!client->waitToTank && !client->waitToWash)//if actual client have no task to be done 
+                if(!client->waitToTank && !client->waitToWash && !client->waitToPay)//if actual client have no task to be done 
                     if(RandomValue()<60){//go to refuel
                         JoinGasolineQueue(client);
                     }
-                    else if(RandomValue()>=60 && RandomValue()<85){//both refuel and wash
+                    /*else if(RandomValue()>=60 && RandomValue()<85){//both refuel and wash
                         if(gasolineQueue.size()<washQueue.size()){
                             JoinGasolineQueue(client);
-                            /*unique_lock<mutex> lck(mx2);
-                            while(!client->waitToTank && !client->waitToPay)
-                                cv.wait(lck);*/
                             JoinWashQueue(client);
                         }
                         else{
                             JoinWashQueue(client);   
-                            /*unique_lock<mutex> lck(mx2);
-                            while(!client->waitToWash && !client->waitToPay)
-                                cv.wait(lck);*/
                             JoinGasolineQueue(client);                         
                         }
-                    }
+                    }*/
                     else {//go to carwash
                         JoinWashQueue(client);
-                    }            
+                    }           
             }
             mx2.unlock();
         }
-        //car wash maintance
-            mx2.lock();
-            if(!carwash.isUsed && client->waitToWash && ((washQueue[0]==client->id || washQueue.empty()))){
-                erase(washQueue,client->id);
-                carwash.isUsed=true;
-                carwash.clientID=client->id;
-                mx2.unlock();
-                client->Wash(client);
-                mx2.lock();
-                client->waitToWash=false;
-                client->SetWaitToPay(true);
-                mx2.unlock();
-            }
-            mx2.unlock();
         }
     }        
 }

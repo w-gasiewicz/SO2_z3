@@ -46,24 +46,16 @@ double Client :: GenerateRandomTime(int a, int b){//function generates random ti
    return distribution(generator);
 }
 void Client :: SetWaitToPay(bool value){
-    mxClient.lock();
     this->waitToPay=value;
-    mxClient.unlock();
 }
 void Client :: SetWaitToTank(bool value){
-    mxClient.lock();
     this->waitToTank=value;
-    mxClient.unlock();
 }
 void Client :: SetDistributorID(int value){
-    mxClient.lock();
     this->distributorID=value;
-    mxClient.unlock();
 }
 void Client :: SetSalesmanID(int value){
-    mxClient.lock();
     this->salesmanID=value;
-    mxClient.unlock();
 }
 Client::~Client() {
 }
